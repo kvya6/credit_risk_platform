@@ -719,8 +719,10 @@ elif "Rules" in tab:
     c1, c2 = st.columns([3, 2])
     with c1:
         st.markdown('<div class="glass">', unsafe_allow_html=True)
+        _tf = top_features.reset_index()
+        _tf.columns = ["Feature", "Importance"]
         fig = px.bar(
-            top_features.reset_index().rename(columns={"index": "Feature", "mean_abs_shap": "Importance"}),
+            _tf,
             x="Importance", y="Feature", orientation="h",
             color="Importance", color_continuous_scale="Plasma"
         )
@@ -875,4 +877,5 @@ elif "Talk" in tab:
                     st.markdown('<div class="glass">', unsafe_allow_html=True)
                     st.plotly_chart(fig, use_container_width=True)
                     st.markdown('</div>', unsafe_allow_html=True)
+
 

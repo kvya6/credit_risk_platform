@@ -33,7 +33,7 @@
     │  Plotly     │ │ Classifier │ │  Tree  │  │ NL → SQL   │
     └─────────────┘ └─────▲──────┘ └────────┘  └─────▼──────┘
                           │                          │
-                 ┌────────▼──────────────────────────▼──────────┐
+                 ┌────────▼──────────────────────────▼────────┐
                  │           Data Layer                        │
                  │  application_train.csv  →  DuckDB           │
                  │  bureau.csv             →  aggregated       │
@@ -48,7 +48,7 @@
 ### Prerequisites
 - Docker Desktop installed and running
 - Kaggle account (to download dataset)
-- Groq API key ([get one free here](https://console.groq.com))
+- API key ([get one here](https://console.groq.com))
 
 ---
 
@@ -79,8 +79,8 @@ cd credit_risk_platform
 # Copy the example env file
 cp .env.example .env
 
-# Open .env and add your Groq API key:
-# GROQ_API_KEY=gsk_...your-key-here...
+# Open .env and add your groq API key:
+# groq_API_KEY=sk-ant-...your-key-here...
 ```
 
 ---
@@ -271,5 +271,4 @@ User question → Claude (NL→SQL) → Validate SQL → DuckDB → Claude (Summ
 - Expand DuckDB schema to include all 7 source tables
 - Add model retraining trigger from UI
 - Add PDF export of risk report per applicant
-
 
