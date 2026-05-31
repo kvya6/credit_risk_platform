@@ -1,4 +1,4 @@
-# 🏦 NeoStats — AI-Powered Credit Risk Intelligence Platform
+# 🏦 — AI-Powered Credit Risk Intelligence Platform
 
 > **Intelligence. Innovation. Impact.**  
 > End-to-end credit risk platform: EDA · ML Prediction · SHAP Explainability · NL-to-SQL Chatbot
