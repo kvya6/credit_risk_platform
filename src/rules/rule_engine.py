@@ -66,7 +66,7 @@ def derive_rules(model, X: pd.DataFrame, y: pd.Series, max_depth: int = 4) -> di
     top_features = importances[importances > 0].sort_values(ascending=False).head(8)
 
     # Build plain-English rules summary
-    plain_rules = _build_plain_rules(rule_tree, feature_names, X)
+    plain_rules = _build_plain_rules(rule_tree, feature_names, X, y)
 
     # Save
     os.makedirs(MODEL_DIR, exist_ok=True)
@@ -84,7 +84,7 @@ def derive_rules(model, X: pd.DataFrame, y: pd.Series, max_depth: int = 4) -> di
     }
 
 
-def _build_plain_rules(tree, feature_names: list, X: pd.DataFrame) -> list[dict]:
+def _build_plain_rules(tree, feature_names: list, X: pd.DataFrame, y: pd.Series = None) -> list[dict]:
     """Extract the most important IF-THEN rules from the decision tree."""
     rules = []
     tree_ = tree.tree_
@@ -96,13 +96,28 @@ def _build_plain_rules(tree, feature_names: list, X: pd.DataFrame) -> list[dict]
     def get_label(feat):
         return FEATURE_LABELS.get(feat, feat.replace("_", " ").title())
 
+    # Build node -> sample index mapping for accurate default rates
+    node_indicator = tree.decision_path(X)
+    leave_id = tree.apply(X)
+    node_indices = {}
+    for sample_idx in range(X.shape[0]):
+        node_id = leave_id[sample_idx]
+        if node_id not in node_indices:
+            node_indices[node_id] = []
+        node_indices[node_id].append(sample_idx)
+
     def recurse(node, conditions, depth):
         if depth > 3:
             return
         if tree_.feature[node] == -2:  # Leaf
             pred_class = np.argmax(tree_.value[node][0])
             n_samples = int(tree_.n_node_samples[node])
-            default_rate = tree_.value[node][0][1] / tree_.n_node_samples[node]
+            # Use actual y labels if available, else fall back to tree value
+            if y is not None and len(node_indices[node]) > 0:
+                actual_defaults = y.iloc[node_indices[node]].sum() if hasattr(y, 'iloc') else y[node_indices[node]].sum()
+                default_rate = actual_defaults / len(node_indices[node])
+            else:
+                default_rate = tree_.value[node][0][1] / tree_.n_node_samples[node]
             if conditions and n_samples > 200:
                 risk = "HIGH RISK — Decline / Review" if pred_class == 1 else "LOW RISK — Approve"
                 rules.append({

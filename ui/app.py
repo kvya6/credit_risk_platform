@@ -1,5 +1,5 @@
 """
-app.py — NeoStats Credit Risk Intelligence Platform
+app.py — Credit Risk Intelligence Platform
 Advanced glassmorphism UI with 5 tabs:
 EDA · Risk Predictor · Explainability · Business Rules · Talk-to-Data
 """
@@ -596,6 +596,38 @@ elif "Risk" in tab:
                 st.error("❌ HIGH RISK — Likely to default. Decline or apply stricter conditions.")
             st.markdown('</div>', unsafe_allow_html=True)
 
+        # ── Model Performance Details ────────────────────────────────────
+        if os.path.exists(METRICS_PATH):
+            metrics = joblib.load(METRICS_PATH)
+            report = metrics.get("classification_report", {})
+            cm = metrics.get("confusion_matrix", None)
+            if report or cm:
+                st.markdown("---")
+                st.subheader("📊 Model Performance Details")
+                perf_cols = st.columns(4)
+                f1_default = report.get("1", {}).get("f1-score", report.get("macro avg", {}).get("f1-score", "—"))
+                precision  = report.get("1", {}).get("precision", "—")
+                recall     = report.get("1", {}).get("recall", "—")
+                accuracy   = report.get("accuracy", "—")
+                perf_cols[0].markdown(f'<div class="kpi-glass kpi-teal"><div class="kpi-label">F1 (Default Class)</div><div class="kpi-value">{f1_default if isinstance(f1_default, str) else f"{f1_default:.4f}"}</div></div>', unsafe_allow_html=True)
+                perf_cols[1].markdown(f'<div class="kpi-glass kpi-blue"><div class="kpi-label">Precision</div><div class="kpi-value">{precision if isinstance(precision, str) else f"{precision:.4f}"}</div></div>', unsafe_allow_html=True)
+                perf_cols[2].markdown(f'<div class="kpi-glass kpi-purple"><div class="kpi-label">Recall</div><div class="kpi-value">{recall if isinstance(recall, str) else f"{recall:.4f}"}</div></div>', unsafe_allow_html=True)
+                perf_cols[3].markdown(f'<div class="kpi-glass kpi-rose"><div class="kpi-label">Accuracy</div><div class="kpi-value">{accuracy if isinstance(accuracy, str) else f"{accuracy:.4f}"}</div></div>', unsafe_allow_html=True)
+                if cm:
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    cm_cols = st.columns([1,2])
+                    with cm_cols[0]:
+                        st.markdown('<div class="glass" style="padding:1rem;">', unsafe_allow_html=True)
+                        st.markdown("**Confusion Matrix**")
+                        cm_df = pd.DataFrame(cm, index=["Actual: Repaid","Actual: Default"], columns=["Pred: Repaid","Pred: Default"])
+                        st.dataframe(cm_df, use_container_width=True)
+                        st.markdown('</div>', unsafe_allow_html=True)
+                    with cm_cols[1]:
+                        st.markdown('<div class="glass" style="padding:1rem;font-size:0.83rem;color:#64748b;line-height:1.9;">', unsafe_allow_html=True)
+                        st.markdown("**Class imbalance strategy**")
+                        st.markdown("The dataset has ~8% default rate (severe imbalance). This model uses LightGBM's <code>scale_pos_weight</code> parameter computed as count(non-default) / count(default), giving the minority class proportionally higher weight during training. This improves recall for the default class without requiring oversampling.", unsafe_allow_html=True)
+                        st.markdown('</div>', unsafe_allow_html=True)
+
         # ── Per-applicant SHAP Waterfall ──────────────────────────────────
         st.markdown("---")
         st.subheader("Why this score? — SHAP Explanation")
@@ -896,5 +928,3 @@ elif "Talk" in tab:
                     st.markdown('<div class="glass">', unsafe_allow_html=True)
                     st.plotly_chart(fig, use_container_width=True)
                     st.markdown('</div>', unsafe_allow_html=True)
-
-
