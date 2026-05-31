@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: credit_risk_platform
+    ports:
+      - "8501:8501"
+    volumes:
+      # Mount your local data/ folder into the container (read-only)
+      - ./data:/app/data
+      # Mount models so trained artifacts persist on your machine
+      - ./models:/app/models
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - DATA_DIR=/app/data
+      - MODEL_DIR=/app/models
+      - DB_PATH=/app/data/credit_risk.duckdb
+    restart: unless-stopped
+
+  # Optional: run setup (train + build DB) once, then exit
+  setup:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: credit_risk_setup
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - DATA_DIR=/app/data
+      - MODEL_DIR=/app/models
+      - DB_PATH=/app/data/credit_risk.duckdb
+    command: python setup_platform.py
+    profiles:
+      - setup

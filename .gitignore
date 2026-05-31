@@ -1,0 +1,33 @@
+# Data — do not commit (too large for git)
+data/
+*.csv
+*.zip
+
+# Model artifacts
+models/*.joblib
+models/*.pkl
+
+# Environment
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+models/
