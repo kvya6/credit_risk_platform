@@ -48,13 +48,13 @@
 ### Prerequisites
 - Docker Desktop installed and running
 - Kaggle account (to download dataset)
-- Anthropic API key ([get one here](https://console.anthropic.com))
+- Groq API key ([get one free here](https://console.groq.com))
 
 ---
 
 ### Step 1 — Clone the Repository
 ```bash
-git clone https://github.com/YOUR_USERNAME/credit_risk_platform.git
+git clone https://github.com/kvya6/credit_risk_platform.git
 cd credit_risk_platform
 ```
 
@@ -79,8 +79,8 @@ cd credit_risk_platform
 # Copy the example env file
 cp .env.example .env
 
-# Open .env and add your Anthropic API key:
-# ANTHROPIC_API_KEY=sk-ant-...your-key-here...
+# Open .env and add your Groq API key:
+# GROQ_API_KEY=gsk_...your-key-here...
 ```
 
 ---
@@ -154,7 +154,7 @@ credit_risk_platform/
 - 5 key business insights
 
 ### Module 2: Talk-to-Data Chatbot
-- Powered by **Claude Sonnet** (claude-sonnet-4-20250514)
+- Powered by **Groq / Llama-3 70B** (llama-3.3-70b-versatile)
 - Schema-grounded system prompt → prevents hallucination
 - SQL validation before execution (blocks DDL/DML)
 - DuckDB backend for fast local queries
@@ -249,7 +249,7 @@ User question → Claude (NL→SQL) → Validate SQL → DuckDB → Claude (Summ
 |----------|--------|-----------|
 | ML Model | LightGBM | Best perf/speed ratio on tabular credit data; SHAP-native |
 | Database | DuckDB | Zero-config, embedded, excellent SQL support |
-| LLM | Claude Sonnet | Low hallucination, strong SQL generation, Anthropic API |
+| LLM | Groq / Llama-3 70B | Free tier, low latency, strong SQL generation, schema-grounded prompts |
 | UI | Streamlit | Python-native, fast to build, easy to Dockerize |
 | Imbalance | scale_pos_weight | No data modification needed; preserves real distribution |
 | SHAP | TreeExplainer | Exact (not approximate), fastest for tree models |
@@ -271,3 +271,5 @@ User question → Claude (NL→SQL) → Validate SQL → DuckDB → Claude (Summ
 - Expand DuckDB schema to include all 7 source tables
 - Add model retraining trigger from UI
 - Add PDF export of risk report per applicant
+
+
