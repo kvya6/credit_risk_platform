@@ -15,7 +15,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 st.set_page_config(
-    page_title="NeoStats | Credit Risk Platform",
+    page_title="Credit Risk Platform",
     page_icon="🏦",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -326,7 +326,6 @@ with st.sidebar:
     st.markdown("""
     <div class="sidebar-logo">
         <div class="logo-icon">🏦</div>
-        <div class="logo-name">NeoStats</div>
         <div class="logo-tag">Credit Risk Platform</div>
     </div>
     """, unsafe_allow_html=True)
@@ -596,6 +595,26 @@ elif "Risk" in tab:
             else:
                 st.error("❌ HIGH RISK — Likely to default. Decline or apply stricter conditions.")
             st.markdown('</div>', unsafe_allow_html=True)
+
+        # ── Per-applicant SHAP Waterfall ──────────────────────────────────
+        st.markdown("---")
+        st.subheader("Why this score? — SHAP Explanation")
+        with st.spinner("Computing individual SHAP values..."):
+            import shap, matplotlib
+            matplotlib.use("Agg")
+            import matplotlib.pyplot as plt
+            explainer = shap.TreeExplainer(model)
+            shap_vals = explainer(row)
+            plt.style.use("dark_background")
+            fig_w, ax_w = plt.subplots(figsize=(10, 5), facecolor="#0a0e1a")
+            ax_w.set_facecolor("#0a0e1a")
+            shap.plots.waterfall(shap_vals[0], max_display=12, show=False)
+            plt.tight_layout()
+            st.markdown('<div class="glass">', unsafe_allow_html=True)
+            st.pyplot(fig_w)
+            plt.close()
+            st.markdown('</div>', unsafe_allow_html=True)
+        st.caption("Red bars push risk UP · Blue bars push risk DOWN · f(x) = final predicted probability")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 3 — EXPLAINABILITY

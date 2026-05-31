@@ -29,7 +29,7 @@
 └──────────┬──────────────┬──────────────┬──────────────┬─────────┘
            │              │              │              │
     ┌──────▼──────┐ ┌─────▼──────┐ ┌───▼────┐  ┌─────▼──────┐
-    │  Pandas EDA │ │ LightGBM   │ │  SHAP  │  │ Claude API │
+    │  Pandas EDA │ │ LightGBM   │ │  SHAP  │  │ Groq API │
     │  Plotly     │ │ Classifier │ │  Tree  │  │ NL → SQL   │
     └─────────────┘ └─────▲──────┘ └────────┘  └─────▼──────┘
                           │                          │
@@ -121,7 +121,7 @@ credit_risk_platform/
 │   │   ├── predict.py             ← Inference + risk banding
 │   │   └── evaluate.py            ← SHAP explanations & metrics
 │   ├── talk_to_data/
-│   │   ├── nl_to_sql.py           ← Claude-powered NL → SQL agent
+│   │   ├── nl_to_sql.py           ← Groq-powered NL → SQL agent
 │   │   ├── db_builder.py          ← Build DuckDB from CSVs
 │   │   └── prompt_templates.py    ← Versioned, schema-grounded prompts
 │   └── utils/
@@ -211,13 +211,13 @@ The dataset has ~8% default rate (severe imbalance). We use:
 
 ### How It Works
 ```
-User question → Claude (NL→SQL) → Validate SQL → DuckDB → Claude (Summarise) → Answer
+User question → Groq (NL→SQL) → Validate SQL → DuckDB → Groq (Summarise) → Answer
 ```
 
 ### Hallucination Controls
 1. **Schema-grounded prompts** — Claude only knows the exact columns that exist
 2. **SQL validation layer** — rejects any non-SELECT query before execution
-3. **UNSUPPORTED_QUERY sentinel** — Claude returns this if question can't be answered
+3. **UNSUPPORTED_QUERY sentinel** — Groq returns this if question can't be answered
 4. **Error handling** — graceful fallback with user-friendly messages
 
 ### Example Working Queries
