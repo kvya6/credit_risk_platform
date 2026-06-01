@@ -1,58 +1,38 @@
-# 🏦 — AI-Powered Credit Risk Intelligence Platform
+# 🏦 Credit Risk Intelligence Platform
 
-> **Intelligence. Innovation. Impact.**  
-> End-to-end credit risk platform: EDA · ML Prediction · SHAP Explainability · NL-to-SQL Chatbot
-
----
-
-## 📋 Table of Contents
-- [Architecture Overview](#architecture-overview)
-- [Quick Start (5 Steps)](#quick-start-5-steps)
-- [Project Structure](#project-structure)
-- [Module Breakdown](#module-breakdown)
-- [Model Details](#model-details)
-- [Talk-to-Data Chatbot](#talk-to-data-chatbot)
-- [Evaluation Metrics](#evaluation-metrics)
-- [Design Decisions](#design-decisions)
-- [Known Limitations](#known-limitations)
+> **Predict. Explain. Decide.**
+> An end-to-end AI platform for credit risk scoring — powered by LightGBM, SHAP, Groq Llama-3, and DuckDB.
 
 ---
 
-## Architecture Overview
+## 👀 What Does This Do?
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                     Streamlit UI (Port 8501)                    │
-│  ┌──────────┐  ┌──────────────┐  ┌────────────┐  ┌─────────┐    │
-│  │ EDA Tab  │  │ Risk Predict │  │ SHAP/XAI   │  │Chatbot  │    │
-│  └──────────┘  └──────────────┘  └────────────┘  └─────────┘    │
-└──────────┬──────────────┬──────────────┬──────────────┬─────────┘
-           │              │              │              │
-    ┌──────▼──────┐ ┌─────▼──────┐ ┌───▼────┐  ┌─────▼──────┐
-    │  Pandas EDA │ │ LightGBM   │ │  SHAP  │  │ Groq API │
-    │  Plotly     │ │ Classifier │ │  Tree  │  │ NL → SQL   │
-    └─────────────┘ └─────▲──────┘ └────────┘  └─────▼──────┘
-                          │                          │
-                 ┌────────▼──────────────────────────▼────────┐
-                 │           Data Layer                        │
-                 │  application_train.csv  →  DuckDB           │
-                 │  bureau.csv             →  aggregated       │
-                 │  previous_application   →  joined           │
-                 └─────────────────────────────────────────────┘
-```
+This platform helps banks make faster, explainable, and auditable credit decisions. Upload applicant data, get an instant risk score, understand *why* the model made that call, and query the entire dataset in plain English.
+
+| Tab | What You Get |
+|-----|-------------|
+| 📊 **EDA Dashboard** | Visual breakdown of 300K applicants — demographics, income, default patterns |
+| 🎯 **Risk Predictor** | Enter applicant details → get a default probability + Approve / Review / Decline |
+| 🔍 **Explainability** | SHAP charts showing exactly which features drove the risk score |
+| 📋 **Business Rules** | Plain IF-THEN rules derived from the ML model — ready for policy teams |
+| 💬 **Talk-to-Data** | Ask questions in plain English → get SQL-powered answers instantly |
 
 ---
 
-## Quick Start (5 Steps)
+## 🚀 Quick Start (5 Steps)
 
 ### Prerequisites
-- Docker Desktop installed and running
-- Kaggle account (to download dataset)
-- API key ([get one here](https://console.groq.com))
+
+Before you begin, make sure you have:
+
+- 🐳 [Docker Desktop](https://www.docker.com/products/docker-desktop) installed and running
+- 🔑 A free [Groq API key](https://console.groq.com) (for the chatbot)
+- 📦 A [Kaggle account](https://www.kaggle.com) (for the dataset)
 
 ---
 
-### Step 1 — Clone the Repository
+### Step 1 — Clone the repo
+
 ```bash
 git clone https://github.com/kvya6/credit_risk_platform.git
 cd credit_risk_platform
@@ -60,215 +40,240 @@ cd credit_risk_platform
 
 ---
 
-### Step 2 — Download the Dataset
-1. Go to: https://www.kaggle.com/competitions/home-credit-default-risk/data
-2. Click **Download All** → you'll get `home-credit-default-risk.zip`
-3. Unzip it and place these files inside the `data/` folder:
-   ```
-   data/
-   ├── application_train.csv      ← Required
-   ├── bureau.csv                 ← Required
-   ├── previous_application.csv   ← Optional (improves model)
-   └── installments_payments.csv  ← Optional (improves model)
-   ```
+### Step 2 — Download the dataset
 
----
+1. Go to 👉 https://www.kaggle.com/competitions/home-credit-default-risk/data
+2. Click **Download All** and unzip
+3. Copy the files into the `data/` folder:
 
-### Step 3 — Set Up Environment Variables
-```bash
-# Copy the example env file
-cp .env.example .env
-
-# Open .env and add your groq API key:
-# groq_API_KEY=sk-ant-...your-key-here...
+```
+data/
+├── application_train.csv   ← Required (307K rows)
+├── bureau.csv              ← Optional — adds ~2% accuracy
+├── previous_application.csv  ← Optional
+└── installments_payments.csv ← Optional
 ```
 
+> 💡 Only `application_train.csv` is required to run. The others are optional but improve the model.
+
 ---
 
-### Step 4 — Train the Model & Build the Database
+### Step 3 — Set your API key
+
 ```bash
-# This runs preprocessing, trains LightGBM, and builds DuckDB
+cp .env.example .env
+```
+
+Open `.env` and paste your Groq key:
+
+```env
+GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+Leave everything else as-is.
+
+---
+
+### Step 4 — Train the model
+
+```bash
 docker-compose --profile setup run setup
 ```
-> ⏱️ This takes ~5–10 minutes on first run. You'll see ROC-AUC and PR-AUC printed when done.
+
+This runs the full setup pipeline (~5–10 minutes):
+
+```
+✅ Loads data
+✅ Cleans and engineers features
+✅ Trains LightGBM model
+✅ Computes SHAP values
+✅ Builds DuckDB database
+✅ Derives IF-THEN business rules
+```
 
 ---
 
-### Step 5 — Launch the Platform
+### Step 5 — Launch the app
+
 ```bash
 docker-compose up
 ```
-Open your browser: **http://localhost:8501**
+
+Open your browser and go to: **http://localhost:8501** 🎉
+
+```bash
+# To stop the app
+docker-compose down
+
+# To rebuild after code changes
+docker-compose down && docker-compose up --build
+```
 
 ---
 
-## Project Structure
+## 🗂️ Project Structure
 
 ```
 credit_risk_platform/
-├── data/                          ← Kaggle CSVs (NOT committed to git)
-│   └── eda_outputs/               ← EDA plots saved here
-├── documents/
-│   └── project_presentation.pdf  ← Project slides
-├── notebooks/
-│   └── eda.py                     ← EDA script (run standalone)
-├── src/
-│   ├── data/
-│   │   ├── loader.py              ← Load & join all CSV tables
-│   │   └── preprocessor.py       ← Clean, encode, impute, engineer features
-│   ├── ml/
-│   │   ├── train.py               ← LightGBM training pipeline
-│   │   ├── predict.py             ← Inference + risk banding
-│   │   └── evaluate.py            ← SHAP explanations & metrics
-│   ├── talk_to_data/
-│   │   ├── nl_to_sql.py           ← Groq-powered NL → SQL agent
-│   │   ├── db_builder.py          ← Build DuckDB from CSVs
-│   │   └── prompt_templates.py    ← Versioned, schema-grounded prompts
-│   └── utils/
-│       ├── config.py              ← Centralised config & env vars
-│       └── logger.py              ← Structured logging
-├── sql/
-│   └── schema.sql                 ← DuckDB table definitions
-├── models/                        ← Saved model artifacts (git-ignored)
-├── ui/
-│   └── app.py                     ← Full Streamlit multi-tab UI
-├── setup_platform.py              ← One-shot setup runner
-├── Dockerfile
-├── docker-compose.yml
-├── requirements.txt
-├── .env.example
-├── .gitignore
-└── README.md
+│
+├── 📁 data/                    ← Your Kaggle CSVs go here (git-ignored)
+├── 📁 models/                  ← Saved model artifacts (auto-generated)
+├── 📁 documents/               ← Project presentation PDF
+├── 📁 notebooks/               ← EDA notebook + script
+│
+├── 📁 src/
+│   ├── data/                   ← loader.py, preprocessor.py
+│   ├── ml/                     ← train.py, predict.py, evaluate.py
+│   ├── rules/                  ← rule_engine.py (IF-THEN rule derivation)
+│   ├── talk_to_data/           ← NL→SQL agent, DuckDB runner, prompt templates
+│   └── utils/                  ← config.py, logger.py
+│
+├── 📁 ui/
+│   ├── app.py                  ← Main Streamlit app
+│   └── glass_theme.py          ← Dark glassmorphism CSS
+│
+├── 🐳 Dockerfile
+├── 🐳 docker-compose.yml
+├── 📄 requirements.txt
+└── 📄 .env.example
 ```
 
 ---
 
-## Module Breakdown
+## 🤖 The ML Model
 
-### Module 1: EDA Dashboard
-- Dataset summary (rows, columns, dtypes, null rates)
-- Target distribution (class imbalance visualised)
-- Default rate by gender, education, income type, age
-- Income and loan amount distributions
-- Correlation heatmap
-- 5 key business insights
+**Model:** LightGBM Classifier
+**Dataset:** Home Credit Default Risk (307,511 applicants, 122 features)
+**Default rate:** 8.1% — severe class imbalance handled with `scale_pos_weight`
 
-### Module 2: Talk-to-Data Chatbot
-- Powered by **Groq / Llama-3 70B** (llama-3.3-70b-versatile)
-- Schema-grounded system prompt → prevents hallucination
-- SQL validation before execution (blocks DDL/DML)
-- DuckDB backend for fast local queries
-- Plain-English summary of every result
-- 8 pre-built example questions
+### Model Performance
 
-### Module 3: Machine Learning Layer
-- **Model**: LightGBM Classifier
-- **Imbalance handling**: `scale_pos_weight` (auto-computed) + optional SMOTE
-- **Output**: default probability, risk score (0-100), risk band (Low/Medium/High)
-- **Evaluation**: ROC-AUC, PR-AUC, confusion matrix, classification report
+| Metric | Score | What It Means |
+|--------|-------|---------------|
+| **ROC-AUC** | 0.7675 | 0.5 = random, 1.0 = perfect |
+| **PR-AUC** | 0.2555 | 3.2× better than random baseline |
+| **Recall** | 62.2% | Catches nearly 2 in 3 real defaulters |
+| **Precision** | 19.1% | 1 in 5 flagged applicants actually defaults |
+| **F1 Score** | 0.2916 | Balance between precision and recall |
+| **Accuracy** | 75.6% | Overall correct predictions |
 
-### Module 4: Explainable AI
-- **SHAP TreeExplainer** (native LightGBM support — fast)
-- Global feature importance (mean |SHAP| bar chart)
-- Beeswarm summary plot (per-sample impact)
-- Per-prediction waterfall chart
-- Human-readable interpretation guide
+> ⚠️ High false positives are intentional — in banking, missing a defaulter costs more than extra caution.
 
-### Module 5: Dockerized Deployment
-- Single Dockerfile + docker-compose.yml
-- Data mounted as volume (not baked into image)
-- Model artifacts persist on host via volume mount
-- `docker-compose up` → full platform running
+### Top Risk Predictors (by SHAP)
+
+| Rank | Feature | Effect |
+|------|---------|--------|
+| 1 | Credit Bureau Score 3 | Higher → lower risk |
+| 2 | Education Level | Higher → lower risk |
+| 3 | Credit Bureau Score 2 | Higher → lower risk |
+| 4 | Loan Term | Longer → higher risk |
+| 5 | Credit Bureau Score 1 | Higher → lower risk |
 
 ---
 
-## Model Details
+## 💬 Talk-to-Data Chatbot
 
-### Why LightGBM?
-- **Speed**: Handles 300K+ rows in minutes
-- **Performance**: Consistently top performer on tabular credit data
-- **SHAP compatibility**: Native TreeExplainer support — fast and exact
-- **Imbalance handling**: Built-in `scale_pos_weight` parameter
+Ask anything about the dataset in plain English. Groq's Llama-3 70B converts it to SQL, runs it on DuckDB, and returns a readable answer.
 
-### Class Imbalance Strategy
-The dataset has ~8% default rate (severe imbalance). We use:
-1. **`scale_pos_weight`** = count(0) / count(1) ≈ 11 — built into LightGBM
-2. **Optional SMOTE** (set `use_smote=True` in train.py) for oversampling minority class
-3. **PR-AUC** as primary metric (more meaningful than accuracy under imbalance)
+**Example questions you can ask:**
 
-### Feature Engineering
-| Feature | Description |
-|---------|-------------|
-| `debt_to_income` | AMT_ANNUITY / AMT_INCOME_TOTAL |
-| `credit_to_income` | AMT_CREDIT / AMT_INCOME_TOTAL |
-| `age_years` | -DAYS_BIRTH / 365 |
-| `employment_years` | -DAYS_EMPLOYED / 365 |
-| `credit_term` | AMT_CREDIT / AMT_ANNUITY |
-
----
-
-## Talk-to-Data Chatbot
-
-### How It Works
-```
-User question → Groq (NL→SQL) → Validate SQL → DuckDB → Groq (Summarise) → Answer
-```
+- *"What is the overall default rate?"*
+- *"Which income type has the highest default rate?"*
+- *"Average loan amount: male vs female?"*
+- *"Default rate by education level?"*
+- *"How many applicants own a car AND property?"*
 
 ### Hallucination Controls
-1. **Schema-grounded prompts** — Claude only knows the exact columns that exist
-2. **SQL validation layer** — rejects any non-SELECT query before execution
-3. **UNSUPPORTED_QUERY sentinel** — Groq returns this if question can't be answered
-4. **Error handling** — graceful fallback with user-friendly messages
 
-### Example Working Queries
-1. "What is the overall default rate?"
-2. "Which income type has the highest default rate?"
-3. "What is the average loan amount for male vs female applicants?"
-4. "How does education level affect default probability?"
-5. "Show top 5 occupations by number of applicants"
-6. "What is the average income for defaulters vs non-defaulters?"
-7. "How many applicants own a car and also own real estate?"
-8. "Show default rate by region risk rating"
+The chatbot is designed to be reliable and safe:
+
+- ✅ Schema-grounded prompts — the model can only reference real columns
+- ✅ SELECT-only queries — no accidental data modification
+- ✅ Auto-retry on SQL errors — feeds error back to model for correction
+- ✅ `UNSUPPORTED_QUERY` fallback — model says so instead of hallucinating
+- ✅ Row limit of 20 — prevents runaway queries
 
 ---
 
-## Evaluation Metrics
+## 📋 Business Rules
 
-| Metric | Expected Range | Notes |
-|--------|---------------|-------|
-| ROC-AUC | 0.74 – 0.78 | Area under ROC curve |
-| PR-AUC | 0.25 – 0.35 | Better metric for imbalanced data |
-| Precision (default=1) | ~0.35 | Of predicted defaulters, % actually defaulting |
-| Recall (default=1) | ~0.60 | Of actual defaulters, % we catch |
+The platform converts the black-box LightGBM model into readable IF-THEN rules — suitable for credit policy documentation and regulatory review.
 
----
+**Sample rules:**
 
-## Design Decisions
+```
+❌ HIGH RISK — Decline / Review
+   IF Credit Bureau Score 3 ≤ 0.316
+   → 734 applicants · 17.6% actual default rate
 
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
-| ML Model | LightGBM | Best perf/speed ratio on tabular credit data; SHAP-native |
-| Database | DuckDB | Zero-config, embedded, excellent SQL support |
-| LLM | Groq / Llama-3 70B | Free tier, low latency, strong SQL generation, schema-grounded prompts |
-| UI | Streamlit | Python-native, fast to build, easy to Dockerize |
-| Imbalance | scale_pos_weight | No data modification needed; preserves real distribution |
-| SHAP | TreeExplainer | Exact (not approximate), fastest for tree models |
+✅ LOW RISK — Approve
+   IF Credit Bureau Score 3 > 0.316
+   IF Credit Bureau Score 2 > 0.389
+   IF Education Level ≤ 1.500
+   → 925 applicants · 4.0% actual default rate
+```
 
 ---
 
-## Known Limitations & Possible Improvements
+## ⚙️ Environment Variables
 
-### Current Limitations
-- Model trained only on `application_train.csv` + bureau aggregates (for speed)
-- SHAP computed on 500-sample subset in UI (full computation is slow)
-- Talk-to-data limited to 2 tables (applications, bureau_summary)
-- No authentication on the UI
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GROQ_API_KEY` | ✅ Yes | Get free at [console.groq.com](https://console.groq.com) |
+| `DATA_DIR` | No (default: `./data`) | Path to your Kaggle CSVs |
+| `MODEL_DIR` | No (default: `./models`) | Where model artifacts are saved |
+| `DB_PATH` | No (default: `./data/credit_risk.duckdb`) | DuckDB database location |
 
-### Possible Improvements
-- Add `POS_CASH_balance.csv` and `credit_card_balance.csv` for richer features
-- Hyperparameter tuning with Optuna
-- Add confidence intervals to predictions
-- Expand DuckDB schema to include all 7 source tables
-- Add model retraining trigger from UI
-- Add PDF export of risk report per applicant
+---
 
+## 🛠️ Tech Stack
+
+| Component | Technology |
+|-----------|-----------|
+| UI | Streamlit 1.35 |
+| ML Model | LightGBM 4.3 |
+| Explainability | SHAP 0.45 (TreeExplainer) |
+| Database | DuckDB 0.10 |
+| LLM | Groq / Llama-3 70B |
+| Deployment | Docker + Docker Compose |
+| Language | Python 3.11 |
+
+---
+
+## ⚠️ Known Limitations
+
+| Limitation | Workaround |
+|------------|-----------|
+| Model trained without `bureau.csv` → ~2–3% lower accuracy | Add `bureau.csv` to `data/` and re-run setup |
+| EDA uses 50K sample (not full 307K) | Statistically representative; increase in `eda.py` if needed |
+| Chatbot limited to 2 tables | Can be extended in `db_builder.py` |
+| No login / authentication | Not production-ready as-is |
+
+---
+
+## 📊 Dataset
+
+- **Source:** [Home Credit Default Risk — Kaggle](https://www.kaggle.com/competitions/home-credit-default-risk/data)
+- **Size:** 307,511 applications · 122 features
+- **Target:** Binary — 1 = defaulted, 0 = repaid
+- **Class balance:** 8.1% default · 91.9% repaid
+
+---
+
+## 🙋 FAQ
+
+**Q: Do I need a paid Groq account?**
+A: No — the free tier is sufficient. The chatbot uses Llama-3 70B with ~1s latency.
+
+**Q: Can I run this without Docker?**
+A: Yes — install dependencies from `requirements.txt` and run `python setup_platform.py` then `streamlit run ui/app.py`.
+
+**Q: The model metrics look low — is that normal?**
+A: PR-AUC of 0.2555 is actually 3.2× better than random (baseline ≈ 0.08) given the 8.1% default rate. Adding `bureau.csv` improves it further.
+
+**Q: How long does setup take?**
+A: First run takes 5–10 minutes. Subsequent launches are instant (model is cached).
+
+---
+
+*Built with ❤️ on the Home Credit Default Risk dataset.*

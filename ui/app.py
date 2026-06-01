@@ -1,4 +1,49 @@
-"""
+
+# ── Human-readable feature name mapping ──────────────────────────────────────
+FEATURE_LABELS = {
+    'EXT_SOURCE_1':               'Credit Bureau Score 1',
+    'EXT_SOURCE_2':               'Credit Bureau Score 2',
+    'EXT_SOURCE_3':               'Credit Bureau Score 3',
+    'AMT_INCOME_TOTAL':           'Annual Income',
+    'AMT_CREDIT':                 'Loan Amount',
+    'AMT_ANNUITY':                'Annual Repayment',
+    'AMT_GOODS_PRICE':            'Goods Price',
+    'DAYS_BIRTH':                 'Applicant Age',
+    'DAYS_EMPLOYED':              'Employment Duration',
+    'DAYS_REGISTRATION':          'Days Since Registration',
+    'DAYS_ID_PUBLISH':            'Days Since ID Issued',
+    'DAYS_LAST_PHONE_CHANGE':     'Days Since Phone Change',
+    'CNT_CHILDREN':               'Number of Children',
+    'CNT_FAM_MEMBERS':            'Family Size',
+    'CODE_GENDER':                'Gender',
+    'FLAG_OWN_CAR':               'Owns a Car',
+    'FLAG_OWN_REALTY':            'Owns Property',
+    'REGION_RATING_CLIENT':       'Region Risk Rating',
+    'REGION_POPULATION_RELATIVE': 'Region Population Density',
+    'NAME_EDUCATION_TYPE':        'Education Level',
+    'NAME_INCOME_TYPE':           'Income Type',
+    'NAME_CONTRACT_TYPE':         'Loan Contract Type',
+    'ORGANIZATION_TYPE':          'Employer Organisation Type',
+    'HOUR_APPR_PROCESS_START':    'Application Hour',
+    'debt_to_income':             'Repayment-to-Income Ratio',
+    'credit_to_income':           'Loan-to-Income Ratio',
+    'age_years':                  'Applicant Age (years)',
+    'employment_years':           'Years Employed',
+    'credit_term':                'Loan Term (years)',
+    'LANDAREA_MODE':              'Land Area',
+    'APARTMENTS_MODE':            'Apartment Size',
+    'FLAG_WORK_PHONE':            'Has Work Phone',
+    'FLAG_PHONE':                 'Has Phone',
+    'FLAG_EMAIL':                 'Has Email',
+    'REG_CITY_NOT_LIVE_CITY':     'Registered vs Living City Mismatch',
+    'REG_CITY_NOT_WORK_CITY':     'Registered vs Work City Mismatch',
+}
+
+def human_name(col):
+    """Return human-readable name for a feature column."""
+    return FEATURE_LABELS.get(col, col.replace('_', ' ').title())
+
+"""""
 app.py — Credit Risk Intelligence Platform
 Advanced glassmorphism UI with 5 tabs:
 EDA · Risk Predictor · Explainability · Business Rules · Talk-to-Data
@@ -507,20 +552,50 @@ elif "Risk" in tab:
         st.markdown("**Personal**")
         age              = st.slider("Age", 20, 70, 35)
         employment_years = st.slider("Employment (years)", 0, 40, 5)
-        cnt_children     = st.selectbox("Children", [0, 1, 2, 3, 4, 5])
-        cnt_fam          = st.selectbox("Family Members", [1, 2, 3, 4, 5, 6], index=1)
+        cnt_children     = st.selectbox("No. of Children", [0,1,2,3,4,5,6,7,8,9,10],
+                             help="Dataset range: 0–19. Values above 10 are extremely rare (<0.01%).")
+        cnt_fam          = st.selectbox("Family Size", [1,2,3,4,5,6,7,8,9,10], index=1,
+                             help="Dataset range: 1–20. Values above 10 are extremely rare.")
     with c3:
         st.markdown("**Profile**")
-        gender      = st.selectbox("Gender", ["M", "F"])
-        education   = st.selectbox("Education", [
-            "Higher education", "Secondary / secondary special",
-            "Incomplete higher", "Lower secondary", "Academic degree"])
+        gender      = st.selectbox("Gender", ["M", "F"],
+                         help="M = Male (34%), F = Female (66%) in dataset. XNA (4 records) excluded.")
+        education   = st.selectbox("Education Level", [
+            "Secondary / secondary special",
+            "Higher education",
+            "Incomplete higher",
+            "Lower secondary",
+            "Academic degree"],
+            help="Secondary/secondary special is most common (71%). Academic degree is rarest (0.05%).")
         income_type = st.selectbox("Income Type", [
-            "Working", "Commercial associate", "Pensioner",
-            "State servant", "Unemployed"])
-        own_car     = st.selectbox("Owns Car?",      ["Y", "N"])
-        own_realty  = st.selectbox("Owns Property?", ["Y", "N"])
-        region      = st.selectbox("Region Rating (1=best)", [1, 2, 3], index=1)
+            "Working",
+            "Commercial associate",
+            "Pensioner",
+            "State servant",
+            "Unemployed",
+            "Student",
+            "Businessman",
+            "Maternity leave"],
+            help="Working is most common (52%). Student/Businessman/Maternity leave are very rare (<0.01%).")
+        own_car     = st.selectbox("Owns a Vehicle?", ["N", "Y"],
+                         help="Y/N only — dataset records ownership, not number of vehicles. 34% own a car.")
+        own_realty  = st.selectbox("Owns Property?", ["Y", "N"],
+                         help="Y/N only — dataset records ownership, not property value. 69% own property.")
+        region      = st.selectbox("Region Risk Rating", [1, 2, 3], index=1,
+                         help="1 = Lowest risk region (10%), 2 = Medium (74%), 3 = Highest risk (16%).")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # ── Credit Bureau Scores ─────────────────────────────────────────────
+    st.markdown('<div class="glass">', unsafe_allow_html=True)
+    st.markdown("**🏦 External Credit Bureau Scores** — leave at 0.5 if unknown (population median)")
+    st.caption("These are the strongest predictors. EXT_SOURCE_1/2/3 are bureau scores from 0 (worst) to 1 (best). Setting all to 0 will always give High Risk — use 0.5 if unsure.")
+    eb1, eb2, eb3 = st.columns(3)
+    with eb1:
+        ext1 = st.slider("EXT_SOURCE_1 (Credit Score 1)", 0.0, 1.0, 0.5, 0.01, help="External credit bureau score 1. Higher = better credit history.")
+    with eb2:
+        ext2 = st.slider("EXT_SOURCE_2 (Credit Score 2)", 0.0, 1.0, 0.5, 0.01, help="External credit bureau score 2. This is the single strongest predictor in the model.")
+    with eb3:
+        ext3 = st.slider("EXT_SOURCE_3 (Credit Score 3)", 0.0, 1.0, 0.5, 0.01, help="External credit bureau score 3.")
     st.markdown('</div>', unsafe_allow_html=True)
 
     if st.button("⚡  Assess Risk Now", use_container_width=True):
@@ -537,6 +612,9 @@ elif "Risk" in tab:
             "FLAG_OWN_CAR":      1 if own_car == "Y" else 0,
             "FLAG_OWN_REALTY":   1 if own_realty == "Y" else 0,
             "REGION_RATING_CLIENT": region,
+            "EXT_SOURCE_1":      ext1,
+            "EXT_SOURCE_2":      ext2,
+            "EXT_SOURCE_3":      ext3,
             "debt_to_income":    amt_annuity / (amt_income + 1),
             "credit_to_income":  amt_credit  / (amt_income + 1),
             "age_years":         age,
@@ -637,10 +715,13 @@ elif "Risk" in tab:
             import matplotlib.pyplot as plt
             explainer = shap.TreeExplainer(model)
             shap_vals = explainer(row)
+            import copy
+            sv_display = copy.deepcopy(shap_vals)
+            sv_display.feature_names = [human_name(f) for f in (shap_vals.feature_names or feature_names)]
             plt.style.use("dark_background")
             fig_w, ax_w = plt.subplots(figsize=(10, 5), facecolor="#0a0e1a")
             ax_w.set_facecolor("#0a0e1a")
-            shap.plots.waterfall(shap_vals[0], max_display=12, show=False)
+            shap.plots.waterfall(sv_display[0], max_display=12, show=False)
             plt.tight_layout()
             st.markdown('<div class="glass">', unsafe_allow_html=True)
             st.pyplot(fig_w)
@@ -687,6 +768,7 @@ elif "Explainab" in tab:
             .sort_values("Mean |SHAP|", ascending=False)
             .head(15)
         )
+        feat_imp["Feature"] = feat_imp["Feature"].apply(human_name)
         fig = px.bar(
             feat_imp.sort_values("Mean |SHAP|"),
             x="Mean |SHAP|", y="Feature", orientation="h",
@@ -702,7 +784,8 @@ elif "Explainab" in tab:
         plt.style.use("dark_background")
         fig2, ax = plt.subplots(figsize=(10, 6), facecolor="#0a0e1a")
         ax.set_facecolor("#0a0e1a")
-        shap.summary_plot(sv, X_sample, max_display=15, show=False, plot_size=None)
+        X_display = X_sample.rename(columns=FEATURE_LABELS)
+        shap.summary_plot(sv, X_display, max_display=15, show=False, plot_size=None)
         plt.tight_layout()
         st.markdown('<div class="glass">', unsafe_allow_html=True)
         st.pyplot(fig2)
@@ -726,11 +809,11 @@ elif "Explainab" in tab:
         st.markdown(
             '<div class="glass"><strong style="color:#a78bfa;">Key predictors</strong>'
             '<ul style="color:#64748b;font-size:0.85rem;line-height:2;">'
-            '<li><code>EXT_SOURCE_1/2/3</code> — External credit bureau scores</li>'
-            '<li><code>debt_to_income</code> — Repayment / income ratio</li>'
-            '<li><code>age_years</code> — Younger applicants = higher risk</li>'
-            '<li><code>AMT_CREDIT</code> — Larger loans = higher risk</li>'
-            '<li><code>employment_years</code> — Longer employment = lower risk</li>'
+            '<li><code>Credit Bureau Scores 1/2/3</code> — External credit history scores</li>'
+            '<li><code>Repayment-to-Income Ratio</code> — Higher burden = higher risk</li>'
+            '<li><code>Applicant Age (years)</code> — Younger applicants = higher risk</li>'
+            '<li><code>Loan Amount</code> — Larger loans = higher risk</li>'
+            '<li><code>Years Employed</code> — Longer employment = lower risk</li>'
             '</ul></div>',
             unsafe_allow_html=True
         )
