@@ -1,4 +1,4 @@
-# Data — do not commit (too large for git)
+﻿# Data — do not commit (too large for git)
 data/
 *.csv
 *.zip
@@ -9,6 +9,9 @@ models/*.pkl
 
 # Environment
 .env
+# Environment
+.venv/
+venv/
 
 # Python
 __pycache__/
@@ -30,4 +33,3 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
-models/
